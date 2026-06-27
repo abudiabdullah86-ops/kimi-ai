@@ -3,722 +3,842 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Dashboard - Real-time Bitcoin Tracker</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Interactive Kinetic Physics & Audio Sandbox</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
                     colors: {
-                        dark: {
-                            900: '#0f172a',
-                            800: '#1e293b',
-                            700: '#334155',
-                            600: '#475569',
-                        },
-                        crypto: {
-                            green: '#10b981',
-                            red: '#ef4444',
-                            blue: '#3b82f6',
-                            purple: '#8b5cf6',
-                        }
+                        obsidian: '#0a0a0f',
+                        obsidianLight: '#13131f',
+                        obsidianBorder: '#1e1e2e',
+                        neonCyan: '#00f0ff',
+                        neonPink: '#ff00ff',
+                        neonGreen: '#00ff88',
+                        neonYellow: '#ffdd00',
+                        neonOrange: '#ff6600',
+                        neonPurple: '#b829ff',
                     }
                 }
             }
         }
     </script>
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .glass-effect {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .animate-pulse-slow {
-            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0f;
+            color: #e0e0e0;
+            overflow: hidden;
+            height: 100vh;
         }
-        .price-up { color: #10b981; }
-        .price-down { color: #ef4444; }
-        .loading-shimmer {
-            background: linear-gradient(90deg, #334155 25%, #475569 50%, #334155 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-        }
-        @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-        .crypto-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-        }
-        /* Custom scrollbar */
+
+        /* Custom Scrollbar */
         ::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #0f172a;
+            background: #13131f;
         }
         ::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 4px;
+            background: #2a2a3e;
+            border-radius: 3px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #475569;
+            background: #3a3a52;
+        }
+
+        /* Glow Effects */
+        .glow-text-cyan {
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5), 0 0 20px rgba(0, 240, 255, 0.3);
+        }
+        .glow-text-pink {
+            text-shadow: 0 0 10px rgba(255, 0, 255, 0.5), 0 0 20px rgba(255, 0, 255, 0.3);
+        }
+        .glow-box {
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.1), inset 0 0 15px rgba(0, 240, 255, 0.05);
+        }
+
+        /* Custom Range Slider */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            background: #1e1e2e;
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #00f0ff;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.8);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #00f0ff;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+        }
+
+        /* Canvas Container */
+        .canvas-container {
+            position: relative;
+            overflow: hidden;
+        }
+        .canvas-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 1px solid rgba(0, 240, 255, 0.15);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Button Animations */
+        .btn-clear {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-clear::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 0, 0, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        .btn-clear:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        .btn-clear:hover {
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+        }
+
+        /* Visualizer Canvas */
+        .visualizer-wrapper {
+            position: relative;
+        }
+        .visualizer-wrapper::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.5), transparent);
+        }
+
+        /* Particle counter badge */
+        .particle-badge {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Sidebar panel */
+        .sidebar-panel {
+            background: linear-gradient(180deg, #13131f 0%, #0f0f1a 100%);
+        }
+
+        /* Canvas grid background */
+        .grid-bg {
+            background-image: 
+                linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
         }
     </style>
 <base target="_blank">
 </head>
-<body class="bg-dark-900 text-white min-h-screen">
+<body class="flex h-screen w-screen overflow-hidden bg-obsidian">
 
-    <!-- Navigation -->
-    <nav class="glass-effect sticky top-0 z-50 border-b border-gray-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-crypto-blue to-crypto-purple rounded-xl flex items-center justify-center">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+    <!-- Sidebar Control Panel -->
+    <aside class="w-80 flex-shrink-0 flex flex-col sidebar-panel border-r border-obsidianBorder h-full z-20">
+
+        <!-- Header -->
+        <div class="p-6 border-b border-obsidianBorder">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-neonCyan to-neonPink flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                </div>
+                <h1 class="text-lg font-bold tracking-wide text-white">Kinetic Physics</h1>
+            </div>
+            <p class="text-xs text-gray-500 font-mono">& Audio Sandbox v2.0</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="px-6 py-4 flex items-center justify-between border-b border-obsidianBorder">
+            <span class="text-xs text-gray-400 uppercase tracking-wider font-medium">Active Particles</span>
+            <span id="particleCount" class="particle-badge text-sm font-bold text-neonCyan font-mono">0</span>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex-1 overflow-y-auto px-6 py-4 space-y-6">
+
+            <!-- Gravity Control -->
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <label class="text-sm font-medium text-gray-300 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-neonCyan" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
                         </svg>
-                    </div>
-                    <span class="text-xl font-bold bg-gradient-to-r from-crypto-blue to-crypto-purple bg-clip-text text-transparent">
-                        CryptoDash
-                    </span>
+                        Gravity
+                    </label>
+                    <span id="gravityValue" class="text-xs font-mono text-neonCyan bg-obsidianBorder px-2 py-1 rounded">0.50</span>
                 </div>
-
-                <div class="hidden md:flex items-center space-x-6">
-                    <a href="#" class="text-gray-300 hover:text-white transition-colors text-sm font-medium">Dashboard</a>
-                    <a href="#markets" class="text-gray-300 hover:text-white transition-colors text-sm font-medium">Markets</a>
-                    <a href="#portfolio" class="text-gray-300 hover:text-white transition-colors text-sm font-medium">Portfolio</a>
-                    <a href="#news" class="text-gray-300 hover:text-white transition-colors text-sm font-medium">News</a>
+                <input type="range" id="gravitySlider" min="0" max="2" step="0.01" value="0.5">
+                <div class="flex justify-between text-[10px] text-gray-600 font-mono">
+                    <span>Zero-G</span>
+                    <span>Heavy</span>
                 </div>
+            </div>
 
-                <div class="flex items-center space-x-4">
-                    <!-- Live indicator -->
-                    <div class="flex items-center space-x-2 bg-dark-800 rounded-full px-3 py-1.5 border border-gray-700">
-                        <div class="w-2 h-2 bg-crypto-green rounded-full animate-pulse"></div>
-                        <span class="text-xs text-gray-400">Live</span>
-                    </div>
-
-                    <button id="refreshBtn" class="p-2 rounded-lg bg-dark-800 hover:bg-dark-700 transition-colors border border-gray-700">
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- Bounciness Control -->
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <label class="text-sm font-medium text-gray-300 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-neonPink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
-                    </button>
+                        Bounciness
+                    </label>
+                    <span id="bounceValue" class="text-xs font-mono text-neonPink bg-obsidianBorder px-2 py-1 rounded">0.80</span>
+                </div>
+                <input type="range" id="bounceSlider" min="0.1" max="1.2" step="0.01" value="0.8">
+                <div class="flex justify-between text-[10px] text-gray-600 font-mono">
+                    <span>Dull</span>
+                    <span>Super</span>
                 </div>
             </div>
-        </div>
-    </nav>
 
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-        <!-- Header Section -->
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-white mb-2">Dashboard Crypto</h1>
-            <p class="text-gray-400">Pantau pergerakan harga cryptocurrency real-time</p>
-        </div>
-
-        <!-- Bitcoin Price Hero Card -->
-        <div class="glass-effect rounded-2xl p-6 mb-8 border border-gray-700">
-            <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-                <div class="flex items-center space-x-4">
-                    <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-500/20">
-                        <svg class="w-10 h-10 text-white" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M23.638 14.904c-1.602 6.43-8.113 10.34-14.542 8.736C2.67 22.05-1.244 15.525.362 9.105 1.962 2.67 8.475-1.243 14.9.358c6.43 1.605 10.342 8.115 8.738 14.546zm-6.35-4.613c.24-1.59-.974-2.45-2.64-3.03l.54-2.153-1.315-.33-.52 2.1c-.347-.087-.7-.167-1.053-.247l.53-2.12-1.32-.33-.54 2.15c-.285-.065-.565-.13-.837-.2l-1.815-.45-.35 1.407s.975.224.955.238c.535.136.63.486.615.766l-.615 2.473c.037.01.085.024.138.047l-.14-.035-.865 3.47c-.066.163-.234.408-.612.315.015.02-.96-.24-.96-.24l-.66 1.51 1.71.428c.318.08.63.164.936.243l-.545 2.19 1.32.33.54-2.16c.36.1.708.19 1.05.27l-.535 2.14 1.32.33.545-2.18c2.24.42 3.93.25 4.64-1.77.57-1.63-.03-2.57-1.08-3.18.77-.18 1.35-.69 1.5-1.75zm-2.7 3.82c-.41 1.64-3.17.76-4.07.53l.73-2.91c.9.23 3.78.67 3.34 2.38zm.41-3.82c-.37 1.49-2.66.73-3.4.55l.66-2.64c.74.19 3.12.53 2.74 2.09z"/>
+            <!-- Speed Control -->
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <label class="text-sm font-medium text-gray-300 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-neonGreen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                         </svg>
-                    </div>
-                    <div>
-                        <div class="flex items-center space-x-2">
-                            <h2 class="text-2xl font-bold text-white">Bitcoin</h2>
-                            <span class="px-2 py-0.5 bg-gray-700 rounded text-xs text-gray-300 font-medium">BTC</span>
-                            <span class="px-2 py-0.5 bg-crypto-green/20 text-crypto-green rounded text-xs font-medium">#1</span>
-                        </div>
-                        <div class="flex items-center space-x-3 mt-1">
-                            <span id="btcPrice" class="text-4xl font-bold text-white">$--</span>
-                            <div id="btcChange" class="flex items-center space-x-1 px-2 py-1 rounded-lg text-sm font-medium">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
-                                </svg>
-                                <span>--%</span>
-                            </div>
-                        </div>
-                    </div>
+                        Spawn Speed
+                    </label>
+                    <span id="speedValue" class="text-xs font-mono text-neonGreen bg-obsidianBorder px-2 py-1 rounded">5.0</span>
                 </div>
-
-                <div class="grid grid-cols-3 gap-4 w-full lg:w-auto">
-                    <div class="bg-dark-800 rounded-xl p-4 border border-gray-700">
-                        <p class="text-xs text-gray-400 mb-1">Market Cap</p>
-                        <p id="btcMarketCap" class="text-lg font-semibold text-white">$--</p>
-                    </div>
-                    <div class="bg-dark-800 rounded-xl p-4 border border-gray-700">
-                        <p class="text-xs text-gray-400 mb-1">Volume 24h</p>
-                        <p id="btcVolume" class="text-lg font-semibold text-white">$--</p>
-                    </div>
-                    <div class="bg-dark-800 rounded-xl p-4 border border-gray-700">
-                        <p class="text-xs text-gray-400 mb-1">ATH</p>
-                        <p id="btcATH" class="text-lg font-semibold text-white">$--</p>
-                    </div>
+                <input type="range" id="speedSlider" min="1" max="15" step="0.5" value="5">
+                <div class="flex justify-between text-[10px] text-gray-600 font-mono">
+                    <span>Slow</span>
+                    <span>Fast</span>
                 </div>
             </div>
-        </div>
 
-        <!-- Chart Section -->
-        <div class="glass-effect rounded-2xl p-6 mb-8 border border-gray-700">
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-                <div>
-                    <h3 class="text-lg font-semibold text-white">Grafik Harga Bitcoin</h3>
-                    <p class="text-sm text-gray-400">Pergerakan harga dalam 7 hari terakhir</p>
-                </div>
-                <div class="flex items-center space-x-2 bg-dark-800 rounded-lg p-1 border border-gray-700">
-                    <button class="timeframe-btn px-4 py-1.5 rounded-md text-sm font-medium bg-crypto-blue text-white transition-all" data-timeframe="7">7D</button>
-                    <button class="timeframe-btn px-4 py-1.5 rounded-md text-sm font-medium text-gray-400 hover:text-white transition-all" data-timeframe="30">30D</button>
-                    <button class="timeframe-btn px-4 py-1.5 rounded-md text-sm font-medium text-gray-400 hover:text-white transition-all" data-timeframe="90">90D</button>
-                    <button class="timeframe-btn px-4 py-1.5 rounded-md text-sm font-medium text-gray-400 hover:text-white transition-all" data-timeframe="365">1Y</button>
-                </div>
-            </div>
-            <div class="relative h-[400px] w-full">
-                <canvas id="priceChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Market Overview Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8" id="markets">
-            <!-- Top Gainers -->
-            <div class="glass-effect rounded-2xl p-6 border border-gray-700">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-white flex items-center space-x-2">
-                        <svg class="w-5 h-5 text-crypto-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+            <!-- Friction Control -->
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <label class="text-sm font-medium text-gray-300 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-neonYellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        <span>Top Gainers</span>
-                    </h3>
-                    <span class="text-xs text-gray-400">24h</span>
+                        Air Resistance
+                    </label>
+                    <span id="frictionValue" class="text-xs font-mono text-neonYellow bg-obsidianBorder px-2 py-1 rounded">0.99</span>
                 </div>
-                <div id="topGainers" class="space-y-3">
-                    <div class="loading-shimmer h-12 rounded-lg"></div>
-                    <div class="loading-shimmer h-12 rounded-lg"></div>
-                    <div class="loading-shimmer h-12 rounded-lg"></div>
-                    <div class="loading-shimmer h-12 rounded-lg"></div>
-                    <div class="loading-shimmer h-12 rounded-lg"></div>
+                <input type="range" id="frictionSlider" min="0.90" max="1.0" step="0.001" value="0.99">
+                <div class="flex justify-between text-[10px] text-gray-600 font-mono">
+                    <span>Thick</span>
+                    <span>Vacuum</span>
                 </div>
             </div>
 
-            <!-- Top Losers -->
-            <div class="glass-effect rounded-2xl p-6 border border-gray-700">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-white flex items-center space-x-2">
-                        <svg class="w-5 h-5 text-crypto-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/>
-                        </svg>
-                        <span>Top Losers</span>
-                    </h3>
-                    <span class="text-xs text-gray-400">24h</span>
-                </div>
-                <div id="topLosers" class="space-y-3">
-                    <div class="loading-shimmer h-12 rounded-lg"></div>
-                    <div class="loading-shimmer h-12 rounded-lg"></div>
-                    <div class="loading-shimmer h-12 rounded-lg"></div>
-                    <div class="loading-shimmer h-12 rounded-lg"></div>
-                    <div class="loading-shimmer h-12 rounded-lg"></div>
-                </div>
-            </div>
+            <!-- Clear Button -->
+            <button id="clearBtn" class="btn-clear w-full py-3 rounded-lg bg-gradient-to-r from-red-900/50 to-red-800/50 border border-red-700/50 text-red-300 font-medium text-sm tracking-wide hover:text-red-100 hover:border-red-500/50">
+                <span class="relative z-10 flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    Clear Sandbox
+                </span>
+            </button>
 
-            <!-- Market Stats -->
-            <div class="glass-effect rounded-2xl p-6 border border-gray-700">
-                <h3 class="text-lg font-semibold text-white mb-4">Statistik Pasar</h3>
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center py-3 border-b border-gray-700">
-                        <span class="text-gray-400 text-sm">Dominasi BTC</span>
-                        <span id="btcDominance" class="text-white font-semibold">--%</span>
-                    </div>
-                    <div class="flex justify-between items-center py-3 border-b border-gray-700">
-                        <span class="text-gray-400 text-sm">Fear & Greed</span>
-                        <span id="fearGreed" class="text-white font-semibold">--</span>
-                    </div>
-                    <div class="flex justify-between items-center py-3 border-b border-gray-700">
-                        <span class="text-gray-400 text-sm">Total Market Cap</span>
-                        <span id="totalMarketCap" class="text-white font-semibold">$--</span>
-                    </div>
-                    <div class="flex justify-between items-center py-3 border-b border-gray-700">
-                        <span class="text-gray-400 text-sm">Volume 24h Global</span>
-                        <span id="globalVolume" class="text-white font-semibold">$--</span>
-                    </div>
-                    <div class="flex justify-between items-center py-3">
-                        <span class="text-gray-400 text-sm">Koin Terdaftar</span>
-                        <span id="totalCoins" class="text-white font-semibold">--</span>
-                    </div>
-                </div>
+            <!-- Instructions -->
+            <div class="p-4 rounded-lg bg-obsidianBorder/50 border border-obsidianBorder space-y-2">
+                <p class="text-xs text-gray-400 font-medium">How to use:</p>
+                <p class="text-[11px] text-gray-500 leading-relaxed">
+                    Click anywhere on the canvas to spawn glowing particles. Each bounce generates a unique synthesizer tone. Adjust physics parameters in real-time.
+                </p>
             </div>
         </div>
 
-        <!-- Crypto Table -->
-        <div class="glass-effect rounded-2xl border border-gray-700 overflow-hidden mb-8">
-            <div class="p-6 border-b border-gray-700">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <h3 class="text-lg font-semibold text-white">Top Cryptocurrency</h3>
-                    <div class="flex items-center space-x-2">
-                        <input type="text" id="searchCrypto" placeholder="Cari crypto..." 
-                            class="bg-dark-800 border border-gray-700 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-crypto-blue transition-colors w-48">
-                    </div>
+        <!-- Audio Visualizer -->
+        <div class="p-4 border-t border-obsidianBorder">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xs text-gray-400 uppercase tracking-wider font-medium">Audio Visualizer</span>
+                <div class="flex items-center gap-1">
+                    <div id="audioIndicator" class="w-2 h-2 rounded-full bg-gray-600"></div>
+                    <span class="text-[10px] text-gray-500 font-mono">LIVE</span>
                 </div>
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr class="bg-dark-800 text-left">
-                            <th class="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">#</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Nama</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider text-right">Harga</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider text-right">24h %</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider text-right hidden md:table-cell">Market Cap</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider text-right hidden md:table-cell">Volume (24h)</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider hidden lg:table-cell">Grafik 7h</th>
-                        </tr>
-                    </thead>
-                    <tbody id="cryptoTable" class="divide-y divide-gray-700">
-                    </tbody>
-                </table>
+            <div class="visualizer-wrapper rounded-lg overflow-hidden bg-obsidianBorder/30 border border-obsidianBorder">
+                <canvas id="visualizerCanvas" width="280" height="80"></canvas>
             </div>
-            <div class="p-4 border-t border-gray-700 flex justify-center">
-                <button id="loadMore" class="px-6 py-2 bg-dark-800 hover:bg-dark-700 border border-gray-700 rounded-lg text-sm text-gray-300 hover:text-white transition-colors">
-                    Muat Lebih Banyak
-                </button>
+        </div>
+    </aside>
+
+    <!-- Main Canvas Area -->
+    <main class="flex-1 relative canvas-container grid-bg">
+        <canvas id="physicsCanvas" class="block w-full h-full"></canvas>
+
+        <!-- Overlay hint -->
+        <div id="hintOverlay" class="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+            <div class="text-center space-y-3">
+                <div class="w-16 h-16 rounded-full border-2 border-neonCyan/30 flex items-center justify-center mx-auto animate-pulse">
+                    <svg class="w-8 h-8 text-neonCyan/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/>
+                    </svg>
+                </div>
+                <p class="text-sm text-gray-500 font-medium">Click anywhere to spawn particles</p>
             </div>
         </div>
 
-        <!-- Portfolio Section (Demo) -->
-        <div class="glass-effect rounded-2xl p-6 border border-gray-700 mb-8" id="portfolio">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <h3 class="text-lg font-semibold text-white">Portofolio Demo</h3>
-                    <p class="text-sm text-gray-400">Simulasi portofolio crypto</p>
-                </div>
-                <div class="text-right">
-                    <p class="text-sm text-gray-400">Total Nilai</p>
-                    <p id="portfolioValue" class="text-2xl font-bold text-white">$12,450.00</p>
-                    <p class="text-sm text-crypto-green">+5.23% ($618.50)</p>
-                </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="portfolioCards">
+        <!-- FPS Counter -->
+        <div class="absolute top-4 right-4 z-10">
+            <div class="bg-obsidian/80 backdrop-blur-sm border border-obsidianBorder rounded-lg px-3 py-1.5">
+                <span class="text-[10px] text-gray-500 font-mono">FPS</span>
+                <span id="fpsCounter" class="text-xs font-bold text-neonGreen font-mono ml-2">60</span>
             </div>
         </div>
-
-        <!-- Footer -->
-        <footer class="text-center py-8 text-gray-500 text-sm">
-            <p>Data disediakan oleh CoinGecko API - Diperbarui real-time</p>
-            <p class="mt-2">2024 CryptoDash. Dibuat untuk tujuan edukasi.</p>
-        </footer>
     </main>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-4 right-4 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
-        <div class="bg-dark-800 border border-gray-700 rounded-xl px-6 py-4 shadow-2xl flex items-center space-x-3">
-            <div class="w-8 h-8 bg-crypto-green/20 rounded-full flex items-center justify-center">
-                <svg class="w-4 h-4 text-crypto-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                </svg>
-            </div>
-            <div>
-                <p class="text-white font-medium text-sm">Data berhasil diperbarui</p>
-                <p class="text-gray-400 text-xs">Harga crypto terkini</p>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // ==================== CONFIGURATION ====================
-        const API_BASE = 'https://api.coingecko.com/api/v3';
-        let currentTimeframe = 7;
-        let priceChart = null;
-        let cryptoData = [];
-        let displayedCount = 20;
-
-        // ==================== UTILITY FUNCTIONS ====================
-        function formatPrice(price) {
-            if (price >= 1) {
-                return new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: 'USD',
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: price > 100 ? 2 : 4
-                }).format(price);
-            } else {
-                return new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: 'USD',
-                    minimumFractionDigits: 6,
-                    maximumFractionDigits: 8
-                }).format(price);
-            }
-        }
-
-        function formatNumber(num) {
-            if (num >= 1e12) return '$' + (num / 1e12).toFixed(2) + 'T';
-            if (num >= 1e9) return '$' + (num / 1e9).toFixed(2) + 'B';
-            if (num >= 1e6) return '$' + (num / 1e6).toFixed(2) + 'M';
-            if (num >= 1e3) return '$' + (num / 1e3).toFixed(2) + 'K';
-            return '$' + num.toFixed(2);
-        }
-
-        function formatPercentage(value) {
-            const sign = value >= 0 ? '+' : '';
-            return `${sign}${value.toFixed(2)}%`;
-        }
-
-        function showToast(message, type) {
-            const toast = document.getElementById('toast');
-            const iconDiv = toast.querySelector('div > div:first-child');
-            const title = toast.querySelector('p:first-child');
-
-            if (type === 'error') {
-                iconDiv.className = 'w-8 h-8 bg-crypto-red/20 rounded-full flex items-center justify-center';
-                iconDiv.innerHTML = '<svg class="w-4 h-4 text-crypto-red" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>';
-                title.textContent = message;
-            } else {
-                iconDiv.className = 'w-8 h-8 bg-crypto-green/20 rounded-full flex items-center justify-center';
-                iconDiv.innerHTML = '<svg class="w-4 h-4 text-crypto-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
-                title.textContent = message;
+        // ==================== AUDIO ENGINE ====================
+        class AudioEngine {
+            constructor() {
+                this.ctx = null;
+                this.analyser = null;
+                this.dataArray = null;
+                this.initialized = false;
+                this.masterGain = null;
+                this.reverb = null;
+                this.scale = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25, 587.33, 659.25, 698.46, 783.99, 880.00];
+                this.pentatonic = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25, 784.00, 880.00];
             }
 
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(function() {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
-        }
+            init() {
+                if (this.initialized) return;
+                try {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    this.analyser = this.ctx.createAnalyser();
+                    this.analyser.fftSize = 256;
+                    this.analyser.smoothingTimeConstant = 0.85;
+                    this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
 
-        // ==================== CHART FUNCTIONS ====================
-        async function fetchChartData(days) {
-            try {
-                const response = await fetch(API_BASE + '/coins/bitcoin/market_chart?vs_currency=usd&days=' + days);
-                const data = await response.json();
-                return data.prices.map(function(price) {
-                    return {
-                        x: new Date(price[0]),
-                        y: price[1]
-                    };
-                });
-            } catch (error) {
-                console.error('Error fetching chart data:', error);
-                showToast('Gagal memuat data grafik', 'error');
-                return [];
+                    this.masterGain = this.ctx.createGain();
+                    this.masterGain.gain.value = 0.3;
+
+                    // Create reverb effect
+                    this.reverb = this.ctx.createConvolver();
+                    this.createReverbImpulse();
+
+                    this.masterGain.connect(this.analyser);
+                    this.analyser.connect(this.ctx.destination);
+
+                    this.initialized = true;
+                } catch (e) {
+                    console.warn('Web Audio API not supported');
+                }
             }
-        }
 
-        async function initChart() {
-            const ctx = document.getElementById('priceChart').getContext('2d');
-            const chartData = await fetchChartData(currentTimeframe);
+            createReverbImpulse() {
+                const rate = this.ctx.sampleRate;
+                const length = rate * 0.5;
+                const decay = 2.0;
+                const impulse = this.ctx.createBuffer(2, length, rate);
 
-            if (chartData.length === 0) return;
-
-            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
-            gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
-
-            priceChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: chartData.map(function(d) { return d.x.toLocaleDateString('id-ID', { month: 'short', day: 'numeric' }); }),
-                    datasets: [{
-                        label: 'Harga BTC (USD)',
-                        data: chartData.map(function(d) { return d.y; }),
-                        borderColor: '#3b82f6',
-                        backgroundColor: gradient,
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 0,
-                        pointHoverRadius: 6,
-                        pointHoverBackgroundColor: '#3b82f6',
-                        pointHoverBorderColor: '#fff',
-                        pointHoverBorderWidth: 2,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {
-                        intersect: false,
-                        mode: 'index',
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                            titleColor: '#fff',
-                            bodyColor: '#fff',
-                            borderColor: 'rgba(255, 255, 255, 0.1)',
-                            borderWidth: 1,
-                            padding: 12,
-                            displayColors: false,
-                            callbacks: {
-                                label: function(context) {
-                                    return 'Price: ' + formatPrice(context.parsed.y);
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: {
-                                display: false,
-                                drawBorder: false
-                            },
-                            ticks: {
-                                color: '#64748b',
-                                maxTicksLimit: 8,
-                                font: {
-                                    size: 11
-                                }
-                            }
-                        },
-                        y: {
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.05)',
-                                drawBorder: false
-                            },
-                            ticks: {
-                                color: '#64748b',
-                                callback: function(value) {
-                                    return '$' + value.toLocaleString();
-                                },
-                                font: {
-                                    size: 11
-                                }
-                            }
-                        }
+                for (let channel = 0; channel < 2; channel++) {
+                    const channelData = impulse.getChannelData(channel);
+                    for (let i = 0; i < length; i++) {
+                        channelData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, decay);
                     }
                 }
-            });
-        }
+                this.reverb.buffer = impulse;
+            }
 
-        async function updateChart(timeframe) {
-            const chartData = await fetchChartData(timeframe);
-            if (chartData.length === 0) return;
+            getFrequencyFromPosition(x, y, canvasWidth, canvasHeight) {
+                // Map position to pentatonic scale
+                const normalizedX = x / canvasWidth;
+                const normalizedY = y / canvasHeight;
+                const index = Math.floor(normalizedX * this.pentatonic.length) % this.pentatonic.length;
+                let freq = this.pentatonic[index];
 
-            priceChart.data.labels = chartData.map(function(d) {
-                if (timeframe <= 1) {
-                    return d.x.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                // Add some variation based on Y position (higher = higher octave)
+                if (normalizedY < 0.33) freq *= 2;
+                else if (normalizedY > 0.66) freq *= 0.5;
+
+                // Add slight detune for organic feel
+                freq += (Math.random() - 0.5) * 5;
+                return freq;
+            }
+
+            playBounce(x, y, canvasWidth, canvasHeight, velocity) {
+                if (!this.initialized) this.init();
+                if (!this.ctx) return;
+
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
                 }
-                return d.x.toLocaleDateString('id-ID', { month: 'short', day: 'numeric' });
-            });
-            priceChart.data.datasets[0].data = chartData.map(function(d) { return d.y; });
-            priceChart.update('none');
-        }
 
-        // ==================== DATA FETCHING ====================
-        async function fetchCryptoData() {
-            try {
-                const response = await fetch(API_BASE + '/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=true&price_change_percentage=24h,7d');
-                cryptoData = await response.json();
-                return cryptoData;
-            } catch (error) {
-                console.error('Error fetching crypto data:', error);
-                showToast('Gagal memuat data crypto', 'error');
-                return [];
+                const freq = this.getFrequencyFromPosition(x, y, canvasWidth, canvasHeight);
+                const intensity = Math.min(velocity / 10, 1);
+
+                // Oscillator 1 - Main tone
+                const osc1 = this.ctx.createOscillator();
+                const gain1 = this.ctx.createGain();
+                osc1.type = 'sine';
+                osc1.frequency.value = freq;
+
+                // Oscillator 2 - Harmonic
+                const osc2 = this.ctx.createOscillator();
+                const gain2 = this.ctx.createGain();
+                osc2.type = 'triangle';
+                osc2.frequency.value = freq * 1.5;
+
+                // Envelope
+                const now = this.ctx.currentTime;
+                const duration = 0.15 + intensity * 0.2;
+
+                gain1.gain.setValueAtTime(0, now);
+                gain1.gain.linearRampToValueAtTime(intensity * 0.4, now + 0.01);
+                gain1.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+                gain2.gain.setValueAtTime(0, now);
+                gain2.gain.linearRampToValueAtTime(intensity * 0.15, now + 0.005);
+                gain2.gain.exponentialRampToValueAtTime(0.001, now + duration * 0.7);
+
+                // Filter for warmth
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 3000 + intensity * 4000;
+                filter.Q.value = 1;
+
+                // Connect
+                osc1.connect(filter);
+                osc2.connect(filter);
+                filter.connect(gain1);
+                filter.connect(gain2);
+                gain1.connect(this.masterGain);
+                gain2.connect(this.masterGain);
+
+                osc1.start(now);
+                osc2.start(now);
+                osc1.stop(now + duration);
+                osc2.stop(now + duration);
+            }
+
+            getFrequencyData() {
+                if (!this.analyser) return new Uint8Array(128);
+                this.analyser.getByteFrequencyData(this.dataArray);
+                return this.dataArray;
             }
         }
 
-        async function fetchGlobalData() {
-            try {
-                const response = await fetch(API_BASE + '/global');
-                const data = await response.json();
-                return data.data;
-            } catch (error) {
-                console.error('Error fetching global data:', error);
-                return null;
+        // ==================== PHYSICS ENGINE ====================
+        class Particle {
+            constructor(x, y, vx, vy, radius, color) {
+                this.x = x;
+                this.y = y;
+                this.vx = vx;
+                this.vy = vy;
+                this.radius = radius;
+                this.color = color;
+                this.mass = radius * radius * 0.01;
+                this.glowIntensity = 1;
+                this.age = 0;
+                this.maxAge = 10000; // frames
+                this.trail = [];
+                this.maxTrailLength = 8;
+            }
+
+            update(gravity, friction, canvasWidth, canvasHeight, restitution, audioEngine) {
+                this.age++;
+
+                // Store trail
+                this.trail.push({ x: this.x, y: this.y });
+                if (this.trail.length > this.maxTrailLength) {
+                    this.trail.shift();
+                }
+
+                // Apply gravity
+                this.vy += gravity;
+
+                // Apply friction (air resistance)
+                this.vx *= friction;
+                this.vy *= friction;
+
+                // Update position
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Wall collisions
+                let bounced = false;
+                let velocity = 0;
+
+                // Right wall
+                if (this.x + this.radius > canvasWidth) {
+                    this.x = canvasWidth - this.radius;
+                    this.vx = -this.vx * restitution;
+                    bounced = true;
+                    velocity = Math.abs(this.vx);
+                }
+                // Left wall
+                else if (this.x - this.radius < 0) {
+                    this.x = this.radius;
+                    this.vx = -this.vx * restitution;
+                    bounced = true;
+                    velocity = Math.abs(this.vx);
+                }
+
+                // Floor
+                if (this.y + this.radius > canvasHeight) {
+                    this.y = canvasHeight - this.radius;
+                    this.vy = -this.vy * restitution;
+                    bounced = true;
+                    velocity = Math.abs(this.vy);
+                }
+                // Ceiling
+                else if (this.y - this.radius < 0) {
+                    this.y = this.radius;
+                    this.vy = -this.vy * restitution;
+                    bounced = true;
+                    velocity = Math.abs(this.vy);
+                }
+
+                // Play sound on bounce with velocity threshold
+                if (bounced && velocity > 1 && audioEngine && audioEngine.initialized) {
+                    audioEngine.playBounce(this.x, this.y, canvasWidth, canvasHeight, velocity);
+                    this.glowIntensity = 1.5;
+                }
+
+                // Decay glow
+                this.glowIntensity = Math.max(1, this.glowIntensity * 0.95);
+
+                // Stop very small movements
+                if (Math.abs(this.vx) < 0.01) this.vx = 0;
+                if (Math.abs(this.vy) < 0.01 && this.y + this.radius >= canvasHeight - 1) this.vy = 0;
+            }
+
+            draw(ctx) {
+                // Draw trail
+                if (this.trail.length > 1) {
+                    ctx.beginPath();
+                    ctx.moveTo(this.trail[0].x, this.trail[0].y);
+                    for (let i = 1; i < this.trail.length; i++) {
+                        ctx.lineTo(this.trail[i].x, this.trail[i].y);
+                    }
+                    ctx.strokeStyle = this.color + '20';
+                    ctx.lineWidth = this.radius * 0.5;
+                    ctx.stroke();
+                }
+
+                // Glow effect
+                const glowSize = this.radius * 3 * this.glowIntensity;
+                const gradient = ctx.createRadialGradient(
+                    this.x, this.y, 0,
+                    this.x, this.y, glowSize
+                );
+                gradient.addColorStop(0, this.color + '80');
+                gradient.addColorStop(0.3, this.color + '30');
+                gradient.addColorStop(1, this.color + '00');
+
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, glowSize, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                // Core
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+
+                // Highlight
+                ctx.beginPath();
+                ctx.arc(this.x - this.radius * 0.3, this.y - this.radius * 0.3, this.radius * 0.3, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.fill();
             }
         }
 
-        // ==================== UI UPDATES ====================
-        function updateBitcoinHero(data) {
-            const btc = data.find(function(c) { return c.id === 'bitcoin'; });
-            if (!btc) return;
+        // ==================== MAIN APPLICATION ====================
+        class PhysicsSandbox {
+            constructor() {
+                this.canvas = document.getElementById('physicsCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.visualizerCanvas = document.getElementById('visualizerCanvas');
+                this.visualizerCtx = this.visualizerCanvas.getContext('2d');
 
-            document.getElementById('btcPrice').textContent = formatPrice(btc.current_price);
+                this.particles = [];
+                this.audioEngine = new AudioEngine();
 
-            const changeEl = document.getElementById('btcChange');
-            const changePercent = btc.price_change_percentage_24h;
-            const isPositive = changePercent >= 0;
+                // Physics parameters
+                this.gravity = 0.5;
+                this.restitution = 0.8;
+                this.spawnSpeed = 5;
+                this.friction = 0.99;
 
-            changeEl.className = 'flex items-center space-x-1 px-2 py-1 rounded-lg text-sm font-medium ' + (isPositive ? 'bg-crypto-green/20 text-crypto-green' : 'bg-crypto-red/20 text-crypto-red');
-            changeEl.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="' + (isPositive ? 'M5 10l7-7m0 0l7 7m-7-7v18' : 'M19 14l-7 7m0 0l-7-7m7 7V3') + '"/></svg><span>' + formatPercentage(changePercent) + '</span>';
+                // Colors
+                this.colors = [
+                    '#00f0ff', '#ff00ff', '#00ff88', '#ffdd00', 
+                    '#ff6600', '#b829ff', '#ff3366', '#00ffcc'
+                ];
 
-            document.getElementById('btcMarketCap').textContent = formatNumber(btc.market_cap);
-            document.getElementById('btcVolume').textContent = formatNumber(btc.total_volume);
-            document.getElementById('btcATH').textContent = formatPrice(btc.ath);
-        }
+                // FPS tracking
+                this.lastTime = 0;
+                this.frameCount = 0;
+                this.fps = 60;
 
-        function updateTopGainersLosers(data) {
-            const sorted = data.slice().sort(function(a, b) { return b.price_change_percentage_24h - a.price_change_percentage_24h; });
-            const gainers = sorted.slice(0, 5);
-            const losers = sorted.slice(-5).reverse();
-
-            function createCoinList(coins, containerId, isGainer) {
-                const container = document.getElementById(containerId);
-                container.innerHTML = coins.map(function(coin) {
-                    return '<div class="flex items-center justify-between p-3 bg-dark-800 rounded-lg border border-gray-700 crypto-card transition-all duration-200"><div class="flex items-center space-x-3"><img src="' + coin.image + '" alt="' + coin.name + '" class="w-8 h-8 rounded-full"><div><p class="text-white font-medium text-sm">' + coin.name + '</p><p class="text-gray-400 text-xs">' + coin.symbol.toUpperCase() + '</p></div></div><div class="text-right"><p class="text-white font-medium text-sm">' + formatPrice(coin.current_price) + '</p><p class="' + (isGainer ? 'text-crypto-green' : 'text-crypto-red') + ' text-xs font-medium">' + formatPercentage(coin.price_change_percentage_24h) + '</p></div></div>';
-                }).join('');
+                this.init();
             }
 
-            createCoinList(gainers, 'topGainers', true);
-            createCoinList(losers, 'topLosers', false);
-        }
+            init() {
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
 
-        function updateCryptoTable(data, searchTerm) {
-            searchTerm = searchTerm || '';
-            const filtered = searchTerm 
-                ? data.filter(function(c) { return c.name.toLowerCase().includes(searchTerm.toLowerCase()) || c.symbol.toLowerCase().includes(searchTerm.toLowerCase()); })
-                : data;
+                // Canvas click
+                this.canvas.addEventListener('mousedown', (e) => this.spawnParticle(e));
+                this.canvas.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    for (let i = 0; i < e.touches.length; i++) {
+                        this.spawnParticle(e.touches[i]);
+                    }
+                }, { passive: false });
 
-            const displayData = filtered.slice(0, displayedCount);
-            const tbody = document.getElementById('cryptoTable');
+                // Controls
+                this.setupControls();
 
-            tbody.innerHTML = displayData.map(function(coin, index) {
-                const isPositive = coin.price_change_percentage_24h >= 0;
-                const sparklineData = coin.sparkline_in_7d ? coin.sparkline_in_7d.price : [];
-                const sparklineColor = isPositive ? '#10b981' : '#ef4444';
+                // Start loop
+                requestAnimationFrame((t) => this.loop(t));
+            }
 
-                const sparklineSvg = sparklineData.length > 0 ? createSparkline(sparklineData, sparklineColor) : '';
+            resize() {
+                const parent = this.canvas.parentElement;
+                this.canvas.width = parent.clientWidth;
+                this.canvas.height = parent.clientHeight;
 
-                return '<tr class="hover:bg-dark-800/50 transition-colors"><td class="px-6 py-4 text-gray-400 text-sm">' + coin.market_cap_rank + '</td><td class="px-6 py-4"><div class="flex items-center space-x-3"><img src="' + coin.image + '" alt="' + coin.name + '" class="w-8 h-8 rounded-full"><div><p class="text-white font-medium text-sm">' + coin.name + '</p><p class="text-gray-400 text-xs">' + coin.symbol.toUpperCase() + '</p></div></div></td><td class="px-6 py-4 text-right text-white font-medium text-sm">' + formatPrice(coin.current_price) + '</td><td class="px-6 py-4 text-right"><span class="' + (isPositive ? 'text-crypto-green' : 'text-crypto-red') + ' text-sm font-medium px-2 py-1 rounded ' + (isPositive ? 'bg-crypto-green/10' : 'bg-crypto-red/10') + '">' + formatPercentage(coin.price_change_percentage_24h) + '</span></td><td class="px-6 py-4 text-right text-gray-300 text-sm hidden md:table-cell">' + formatNumber(coin.market_cap) + '</td><td class="px-6 py-4 text-right text-gray-300 text-sm hidden md:table-cell">' + formatNumber(coin.total_volume) + '</td><td class="px-6 py-4 hidden lg:table-cell"><div class="w-24 h-10 mx-auto">' + sparklineSvg + '</div></td></tr>';
-            }).join('');
+                // Handle high DPI
+                const dpr = window.devicePixelRatio || 1;
+                this.canvas.width = parent.clientWidth * dpr;
+                this.canvas.height = parent.clientHeight * dpr;
+                this.canvas.style.width = parent.clientWidth + 'px';
+                this.canvas.style.height = parent.clientHeight + 'px';
+                this.ctx.scale(dpr, dpr);
+                this.logicalWidth = parent.clientWidth;
+                this.logicalHeight = parent.clientHeight;
+            }
 
-            document.getElementById('loadMore').style.display = filtered.length > displayedCount ? 'block' : 'none';
-        }
-
-        function createSparkline(data, color) {
-            const width = 96;
-            const height = 40;
-            const min = Math.min.apply(null, data);
-            const max = Math.max.apply(null, data);
-            const range = max - min || 1;
-
-            const points = data.map(function(value, index) {
-                const x = (index / (data.length - 1)) * width;
-                const y = height - ((value - min) / range) * height;
-                return x + ',' + y;
-            }).join(' ');
-
-            return '<svg width="' + width + '" height="' + height + '" viewBox="0 0 ' + width + ' ' + height + '" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="' + points + '" stroke="' + color + '" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-        }
-
-        function updateMarketStats(globalData) {
-            if (!globalData) return;
-
-            document.getElementById('btcDominance').textContent = globalData.market_cap_percentage.btc.toFixed(1) + '%';
-            document.getElementById('totalMarketCap').textContent = formatNumber(globalData.total_market_cap.usd);
-            document.getElementById('globalVolume').textContent = formatNumber(globalData.total_volume.usd);
-            document.getElementById('totalCoins').textContent = globalData.active_cryptocurrencies.toLocaleString();
-
-            const marketChange = globalData.market_cap_change_percentage_24h_usd;
-            var fearGreedValue, fearGreedText;
-            if (marketChange > 5) { fearGreedValue = 75; fearGreedText = 'Greed'; }
-            else if (marketChange > 0) { fearGreedValue = 55; fearGreedText = 'Neutral'; }
-            else if (marketChange > -5) { fearGreedValue = 35; fearGreedText = 'Fear'; }
-            else { fearGreedValue = 20; fearGreedText = 'Extreme Fear'; }
-
-            document.getElementById('fearGreed').textContent = fearGreedValue + ' (' + fearGreedText + ')';
-            document.getElementById('fearGreed').className = 'font-semibold ' + (marketChange > 0 ? 'text-crypto-green' : 'text-crypto-red');
-        }
-
-        function updatePortfolio(data) {
-            const portfolioCoins = ['bitcoin', 'ethereum', 'solana', 'binancecoin'];
-            const holdings = {
-                'bitcoin': 0.15,
-                'ethereum': 2.5,
-                'solana': 50,
-                'binancecoin': 10
-            };
-
-            const container = document.getElementById('portfolioCards');
-            var totalValue = 0;
-
-            const cards = portfolioCoins.map(function(id) {
-                const coin = data.find(function(c) { return c.id === id; });
-                if (!coin) return '';
-
-                const value = coin.current_price * holdings[id];
-                totalValue += value;
-                const isPositive = coin.price_change_percentage_24h >= 0;
-
-                return '<div class="bg-dark-800 rounded-xl p-4 border border-gray-700 crypto-card transition-all duration-200"><div class="flex items-center justify-between mb-3"><div class="flex items-center space-x-2"><img src="' + coin.image + '" alt="' + coin.name + '" class="w-8 h-8 rounded-full"><span class="text-white font-medium text-sm">' + coin.symbol.toUpperCase() + '</span></div><span class="' + (isPositive ? 'text-crypto-green' : 'text-crypto-red') + ' text-xs font-medium">' + formatPercentage(coin.price_change_percentage_24h) + '</span></div><p class="text-white font-bold text-lg">' + formatPrice(value) + '</p><p class="text-gray-400 text-xs mt-1">' + holdings[id] + ' ' + coin.symbol.toUpperCase() + '</p></div>';
-            }).join('');
-
-            container.innerHTML = cards;
-            document.getElementById('portfolioValue').textContent = formatPrice(totalValue);
-        }
-
-        // ==================== EVENT LISTENERS ====================
-        document.querySelectorAll('.timeframe-btn').forEach(function(btn) {
-            btn.addEventListener('click', async function() {
-                document.querySelectorAll('.timeframe-btn').forEach(function(b) {
-                    b.classList.remove('bg-crypto-blue', 'text-white');
-                    b.classList.add('text-gray-400');
+            setupControls() {
+                // Gravity
+                const gravitySlider = document.getElementById('gravitySlider');
+                const gravityValue = document.getElementById('gravityValue');
+                gravitySlider.addEventListener('input', (e) => {
+                    this.gravity = parseFloat(e.target.value);
+                    gravityValue.textContent = this.gravity.toFixed(2);
                 });
-                this.classList.remove('text-gray-400');
-                this.classList.add('bg-crypto-blue', 'text-white');
 
-                currentTimeframe = parseInt(this.dataset.timeframe);
-                await updateChart(currentTimeframe);
-            });
-        });
+                // Bounciness
+                const bounceSlider = document.getElementById('bounceSlider');
+                const bounceValue = document.getElementById('bounceValue');
+                bounceSlider.addEventListener('input', (e) => {
+                    this.restitution = parseFloat(e.target.value);
+                    bounceValue.textContent = this.restitution.toFixed(2);
+                });
 
-        document.getElementById('refreshBtn').addEventListener('click', async function() {
-            this.classList.add('animate-spin');
-            await loadAllData();
-            setTimeout(function() { this.classList.remove('animate-spin'); }.bind(this), 500);
-            showToast('Data berhasil diperbarui');
-        });
+                // Speed
+                const speedSlider = document.getElementById('speedSlider');
+                const speedValue = document.getElementById('speedValue');
+                speedSlider.addEventListener('input', (e) => {
+                    this.spawnSpeed = parseFloat(e.target.value);
+                    speedValue.textContent = this.spawnSpeed.toFixed(1);
+                });
 
-        document.getElementById('searchCrypto').addEventListener('input', function() {
-            updateCryptoTable(cryptoData, this.value);
-        });
+                // Friction
+                const frictionSlider = document.getElementById('frictionSlider');
+                const frictionValue = document.getElementById('frictionValue');
+                frictionSlider.addEventListener('input', (e) => {
+                    this.friction = parseFloat(e.target.value);
+                    frictionValue.textContent = this.friction.toFixed(3);
+                });
 
-        document.getElementById('loadMore').addEventListener('click', function() {
-            displayedCount += 20;
-            updateCryptoTable(cryptoData, document.getElementById('searchCrypto').value);
-        });
-
-        // ==================== MAIN LOAD FUNCTION ====================
-        async function loadAllData() {
-            const [cryptoDataResult, globalData] = await Promise.all([
-                fetchCryptoData(),
-                fetchGlobalData()
-            ]);
-
-            if (cryptoDataResult.length > 0) {
-                updateBitcoinHero(cryptoDataResult);
-                updateTopGainersLosers(cryptoDataResult);
-                updateCryptoTable(cryptoDataResult);
-                updatePortfolio(cryptoDataResult);
+                // Clear button
+                document.getElementById('clearBtn').addEventListener('click', () => {
+                    this.particles = [];
+                    this.updateParticleCount();
+                });
             }
 
-            if (globalData) {
-                updateMarketStats(globalData);
+            spawnParticle(e) {
+                // Initialize audio on first interaction
+                this.audioEngine.init();
+
+                const rect = this.canvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left);
+                const y = (e.clientY - rect.top);
+
+                // Random velocity based on spawn speed
+                const angle = Math.random() * Math.PI * 2;
+                const speed = this.spawnSpeed * (0.5 + Math.random() * 0.5);
+                const vx = Math.cos(angle) * speed;
+                const vy = Math.sin(angle) * speed - 2; // slight upward bias
+
+                const radius = 6 + Math.random() * 10;
+                const color = this.colors[Math.floor(Math.random() * this.colors.length)];
+
+                this.particles.push(new Particle(x, y, vx, vy, radius, color));
+
+                // Play spawn sound
+                if (this.audioEngine.initialized) {
+                    this.audioEngine.playBounce(x, y, this.logicalWidth, this.logicalHeight, this.spawnSpeed);
+                }
+
+                // Hide hint
+                document.getElementById('hintOverlay').style.opacity = '0';
+
+                this.updateParticleCount();
+            }
+
+            updateParticleCount() {
+                document.getElementById('particleCount').textContent = this.particles.length;
+            }
+
+            drawVisualizer() {
+                const ctx = this.visualizerCtx;
+                const width = this.visualizerCanvas.width;
+                const height = this.visualizerCanvas.height;
+                const data = this.audioEngine.getFrequencyData();
+
+                ctx.clearRect(0, 0, width, height);
+
+                const barCount = 64;
+                const barWidth = width / barCount;
+                const step = Math.floor(data.length / barCount);
+
+                // Audio indicator
+                const avg = data.reduce((a, b) => a + b, 0) / data.length;
+                const indicator = document.getElementById('audioIndicator');
+                if (avg > 10) {
+                    indicator.style.backgroundColor = '#00ff88';
+                    indicator.style.boxShadow = '0 0 8px #00ff88';
+                } else {
+                    indicator.style.backgroundColor = '#4b5563';
+                    indicator.style.boxShadow = 'none';
+                }
+
+                for (let i = 0; i < barCount; i++) {
+                    const value = data[i * step] || 0;
+                    const barHeight = (value / 255) * height * 0.9;
+
+                    const x = i * barWidth;
+                    const y = height - barHeight;
+
+                    // Gradient based on height
+                    const gradient = ctx.createLinearGradient(0, height, 0, y);
+                    gradient.addColorStop(0, 'rgba(0, 240, 255, 0.1)');
+                    gradient.addColorStop(0.5, 'rgba(0, 240, 255, 0.4)');
+                    gradient.addColorStop(1, 'rgba(0, 240, 255, 0.8)');
+
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(x + 1, y, barWidth - 2, barHeight);
+
+                    // Top glow
+                    ctx.fillStyle = 'rgba(0, 240, 255, 0.9)';
+                    ctx.fillRect(x + 1, y, barWidth - 2, 2);
+                }
+
+                // Center line
+                ctx.strokeStyle = 'rgba(0, 240, 255, 0.1)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(0, height / 2);
+                ctx.lineTo(width, height / 2);
+                ctx.stroke();
+            }
+
+            loop(timestamp) {
+                // FPS calculation
+                this.frameCount++;
+                if (timestamp - this.lastTime >= 1000) {
+                    this.fps = this.frameCount;
+                    this.frameCount = 0;
+                    this.lastTime = timestamp;
+                    document.getElementById('fpsCounter').textContent = this.fps;
+                }
+
+                // Clear canvas
+                this.ctx.clearRect(0, 0, this.logicalWidth, this.logicalHeight);
+
+                // Update and draw particles
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const p = this.particles[i];
+                    p.update(
+                        this.gravity, 
+                        this.friction, 
+                        this.logicalWidth, 
+                        this.logicalHeight, 
+                        this.restitution,
+                        this.audioEngine
+                    );
+                    p.draw(this.ctx);
+
+                    // Remove old particles if too many
+                    if (this.particles.length > 300 && p.age > p.maxAge) {
+                        this.particles.splice(i, 1);
+                    }
+                }
+
+                this.updateParticleCount();
+
+                // Draw visualizer
+                this.drawVisualizer();
+
+                requestAnimationFrame((t) => this.loop(t));
             }
         }
 
-        // ==================== INITIALIZATION ====================
-        document.addEventListener('DOMContentLoaded', async function() {
-            await initChart();
-            await loadAllData();
-
-            // Auto refresh every 60 seconds
-            setInterval(async function() {
-                await loadAllData();
-            }, 60000);
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            new PhysicsSandbox();
         });
     </script>
 </body>
